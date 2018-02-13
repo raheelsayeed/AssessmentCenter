@@ -27,14 +27,10 @@ open class ACClient {
     private final let accessIdentifier : String
     private final let accessToken : String
     public  final let baseURL : URL
-    private final let urlSession : URLSession
     
     public required init(baseURL base: URL, accessIdentifier: String, token: String) {
         self.accessIdentifier = accessIdentifier
         self.accessToken = token
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
-        self.urlSession = URLSession(configuration : URLSessionConfiguration.default, delegate: nil, delegateQueue: queue)
         if base.absoluteString.last != "/" {
             self.baseURL = base.appendingPathComponent("/")
         } else {
