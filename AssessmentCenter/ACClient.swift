@@ -7,8 +7,10 @@
 //
 
 /*
-    - UTC, CST Dates? Difference?
-    - Can Participant/<> API sent back the FormID in Question?
+ ? UTC, CST Dates? Difference?
+ ? Can Participant/<> API sent back the FormID in Question?
+ - TODO:
+ - Error Codes (AC Status)
 */
 
 import Foundation
@@ -182,6 +184,22 @@ open class ACClient {
         nextQuestion(sessionOID: session.OID, responseItemOID: responseItem?.responseOID, responseValue: responseItem?.value, completion: completion)
         
     }
+    
+    public func score(session: SessionItem, completion: ((_ score : ACScore?, _ error : Error?)->Void)?) {
+        let endpoint = "Results/\(session.OID).json"
+        performRequest(path: endpoint, headers: nil) { (json, error) in
+            if let json = json {
+                let score = ACScore(from: json)
+                completion?(score, nil)
+            }
+            else {
+                print("Could Not Get the score")
+                completion?(nil, nil)
+            }
+        }
+    }
+    
+    
 }
 
 

@@ -187,5 +187,21 @@ public class SessionItem : ACAbstractItem {
 }
 
 
-
+public struct ACScore {
+    
+    public  let tscore : String
+    private let stdError : String
+    public  let standardError : String
+    public  let username : String
+    let formName : String
+    
+    init(from json :JSONDict) {
+        let theta = json["Theta"] as! String
+        self.stdError = json["StdError"] as! String
+        username      = json["UID"] as! String
+        formName      = json["Name"] as! String
+        self.tscore = String(round((Double(theta)! * 10) + 50.0))
+        self.standardError =  String(round(Double(stdError)! * 10))
+    }
+}
 
