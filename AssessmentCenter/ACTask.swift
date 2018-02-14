@@ -31,7 +31,7 @@ class ACTask : ORKNavigableOrderedTask {
     }
     
     class func instructionStep(identifier: String) -> ORKInstructionStep {
-        let instructionStep = ORKInstructionStep.init(identifier: identifier)
+        let instructionStep = ORKInstructionStep(identifier: identifier)
         return instructionStep
     }
     
@@ -53,7 +53,7 @@ class ACTask : ORKNavigableOrderedTask {
             let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
             if responseItem != nil {
                 let semaphore = DispatchSemaphore(value: 0)
-                self.client.nextQuestion(session: self.session!, responseItem: responseItem, completion: { (newQuestionForm, error, completed, completionDate) in
+                self.client.nextQuestion(session: self.session!, responseItem: responseItem, completion: { [unowned self] (newQuestionForm, error, completed, completionDate) in
                     let destinationStepID = (completed) ? ACStep.conclusionStep.rawValue : newQuestionForm!.OID
                     let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: destinationStepID)
                     self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
