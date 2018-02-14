@@ -146,7 +146,6 @@ open class ACClient {
     public func beginSession(with form: ACForm, username: String?, expiration: Date?, completion : ((_ newSession : SessionItem?) -> Void)?) {
         let endpoint = "Assessments/\(form.OID).json"
         //::: No custom expiration support yet.
-
         let requestHeader = ["UID" : username] as? RequestHeaders
         performRequest(path: endpoint, headers: requestHeader) { (json, error) in
             
@@ -173,7 +172,6 @@ open class ACClient {
                     return
                 }
                 let qForm = QuestionForm.create(from: formJSON.first! )
-                print(json)
                 completion?(qForm, nil, false, nil)
             }
             else {

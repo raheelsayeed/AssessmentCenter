@@ -8,6 +8,8 @@
 
 import Foundation
 
+
+
 open class ACAbstractItem {
     
     public  let OID : String
@@ -91,6 +93,7 @@ public class ResponseItem : ACAbstractItem {
 
 public class QuestionForm : ACAbstractItem {
     
+    public final var question  : String?
     public final var questions : [QuestionItem]
     public final var responses : [ResponseItem]
     public final let formID    : String
@@ -111,6 +114,7 @@ public class QuestionForm : ACAbstractItem {
         self.questions = questions
         self.responses = responses
         self.formID    = formID
+        self.question  = questions.filter { $0.question.contains("Container") == false }.map{ $0.question }.joined(separator: ",\n")
         super.init(oid: oid, responseOID: nil, order: order)
     }
     
@@ -153,6 +157,16 @@ public class ACForm : ACAbstractItem {
             let qForms = questionFormElements.map { QuestionForm.create(from: $0)! }
             self.questionForms = qForms
         }
+    }
+    
+    public func getResponseItem(responseOID: String, forQuestionFormOID qOID: String) -> ResponseItem? {
+        guard let questionForms = questionForms else {
+            print("No questions in Form")
+            return nil
+        }
+        
+        let qForm = questionForms.filter{ $0.OID == qOID }.first
+        return qForm?.responses.filter{ $0.responseOID == responseOID }.first
     }
 }
 
