@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D40A623520348657007B2C54 /* ResearchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D40A623620348657007B2C54 /* ResearchKit.framework */; };
 		D442E0B520333FD30012857C /* AssessmentCenter.h in Headers */ = {isa = PBXBuildFile; fileRef = D442E0B320333FD30012857C /* AssessmentCenter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D442E0C2203341030012857C /* ACModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442E0C1203341030012857C /* ACModel.swift */; };
 		D442E0CA2033509D0012857C /* ACClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442E0C92033509D0012857C /* ACClient.swift */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D40A623620348657007B2C54 /* ResearchKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ResearchKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D442E0B020333FD30012857C /* AssessmentCenter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AssessmentCenter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D442E0B320333FD30012857C /* AssessmentCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssessmentCenter.h; sourceTree = "<group>"; };
 		D442E0B420333FD30012857C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -27,17 +29,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D40A623520348657007B2C54 /* ResearchKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D40A623420348657007B2C54 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D40A623620348657007B2C54 /* ResearchKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D442E0A620333FD30012857C = {
 			isa = PBXGroup;
 			children = (
 				D442E0B220333FD30012857C /* AssessmentCenter */,
 				D442E0B120333FD30012857C /* Products */,
+				D40A623420348657007B2C54 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
