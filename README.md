@@ -11,6 +11,8 @@ Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer A
 ## Getting Started
 
 ```swift
+import AssessmentCenter
+
 
 // initialise Assessment Center Client
 let baseURLString = "https://www.assessmentcenter.net/ac_api/.."
