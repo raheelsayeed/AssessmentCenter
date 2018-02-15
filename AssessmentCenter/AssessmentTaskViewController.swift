@@ -16,11 +16,11 @@ public class AssessmentViewController : ORKTaskViewController {
     let btnTitle_Conluded             =   "Done"
     let btnTitle_BeginSession         =   "Begin"
     let sessionIdentifier: String
-    weak var instructionsDelegate    : AssessmentViewControllerInstructionsDelegate? = nil
-    weak var taskDelegate            : AssessmentViewControllerDelegate? = nil
-    var movingNextPage               = true
-    var score                        : ACScore?
-    var tsk : ACTask {
+    public weak var instructionsDelegate    : AssessmentViewControllerInstructionsDelegate? = nil
+    public weak var taskDelegate            : AssessmentViewControllerDelegate? = nil
+    private var movingNextPage               = true
+    private var score                        : ACScore?
+    private var tsk : ACTask {
         get {
             return self.task as! ACTask
         }
@@ -149,9 +149,8 @@ extension AssessmentViewController : ORKTaskViewControllerDelegate {
         else if step.identifier == ACStep.introductionStep.rawValue {
             
             if let instructionsDelegate = instructionsDelegate {
-                
+                step.title = self.tsk.form.title
                 step.text = instructionsDelegate.sessionInstructionsForTaskVC(self)
-                
             }
             
         }
@@ -165,13 +164,13 @@ public enum AssessementFinishReason : Int {
     case fail
 }
 
-protocol AssessmentViewControllerDelegate : class  {
+public protocol AssessmentViewControllerDelegate : class  {
     
     func assessmentViewController(_ assessmentViewController: AssessmentViewController, didFinishWith reason: AssessementFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
     
     func canDismissTaskVC(_ canDismissVC:AssessmentViewController) -> Bool
 }
-protocol AssessmentViewControllerInstructionsDelegate : class  {
+public protocol AssessmentViewControllerInstructionsDelegate : class  {
     
     func sessionCompletionMessageForTaskVC(_ sessionCompletionMessageForTaskVC: AssessmentViewController) -> String?
     

@@ -128,19 +128,19 @@ open class ACClient {
     }
     
     public func form(acform: ACForm, completion : (( _ form: ACForm? )-> Void)?) {
-        self.form(OID: acform.OID, completion: completion)
-    }
-    
-    public func form(OID: String, completion: ((_ form: ACForm?)->Void)?) {
-        let formEndpoint = "Forms/\(OID).json"
-        let acform = ACForm(_oid: OID, _title: nil, _loinc: nil)
+        let formEndpoint = "Forms/\(acform.OID).json"
         performRequest(path: formEndpoint, headers: nil) { (json, error) in
-            
             if let json = json {
                 acform.parse(from: json)
                 completion?(acform)
             }
         }
+    }
+    
+    public func form(OID: String, completion: ((_ form: ACForm?)->Void)?) {
+        let acform = ACForm(_oid: OID, _title: nil, _loinc: nil)
+        self.form(acform: acform, completion: completion)
+        
     }
     
     
