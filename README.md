@@ -35,8 +35,9 @@ let form = ACForm()
 client.form(acform: form, completion: { [unowned self] (completeForm) in 
     DispatchQueue.main.sync {
         if let completeForm = completeForm {
-            let assessmentViewController = AssessmentViewController(acform: completeForm, client: client, sessionIdentifier: "Neuro-Clinic-testing")
-            self.present(assessmentViewController, animated: true, completion: nil)
+            // ACTaskViewController is a subclass of ORKTaskViewController (ResearchKit)
+            let taskViewController = ACTaskViewController(acform: completeForm, client: client, sessionIdentifier: "Neuro-Clinic-testing")
+            self.present(taskViewController, animated: true, completion: nil)
        }
    }
 }

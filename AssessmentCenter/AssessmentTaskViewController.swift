@@ -10,14 +10,14 @@ import Foundation
 import ResearchKit
 
 
-public class AssessmentViewController : ORKTaskViewController {
+public class ACTaskViewController : ORKTaskViewController {
     
     let btnTitle_inSession            =   "Continue"
     let btnTitle_Conluded             =   "Done"
     let btnTitle_BeginSession         =   "Begin"
     let sessionIdentifier: String
-    public weak var instructionsDelegate    : AssessmentViewControllerInstructionsDelegate? = nil
-    public weak var taskDelegate            : AssessmentViewControllerDelegate? = nil
+    public weak var instructionsDelegate    : ACTaskViewControllerInstructionsDelegate? = nil
+    public weak var taskDelegate            : ACTaskViewControllerDelegate? = nil
     private var movingNextPage               = true
     private var score                        : ACScore?
     private var tsk : ACTask {
@@ -98,7 +98,7 @@ public class AssessmentViewController : ORKTaskViewController {
     
 }
 
-extension AssessmentViewController : ORKTaskViewControllerDelegate {
+extension ACTaskViewController : ORKTaskViewControllerDelegate {
     
     
     func configureConclusionFor(step: ORKStep, with score: ACScore) {
@@ -158,21 +158,21 @@ extension AssessmentViewController : ORKTaskViewControllerDelegate {
         return nil
     }
 }
-public enum AssessementFinishReason : Int {
+public enum ACTaskFinishReason : Int {
     
     case success
     case fail
 }
 
-public protocol AssessmentViewControllerDelegate : class  {
+public protocol ACTaskViewControllerDelegate : class  {
     
-    func assessmentViewController(_ assessmentViewController: AssessmentViewController, didFinishWith reason: AssessementFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
+    func assessmentViewController(_ taskViewController: ACTaskViewController, didFinishWith reason: ACTaskFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
     
-    func canDismissTaskVC(_ canDismissVC:AssessmentViewController) -> Bool
+    func canDismissTaskVC(_ canDismissVC:ACTaskViewController) -> Bool
 }
-public protocol AssessmentViewControllerInstructionsDelegate : class  {
+public protocol ACTaskViewControllerInstructionsDelegate : class  {
     
-    func sessionCompletionMessageForTaskVC(_ sessionCompletionMessageForTaskVC: AssessmentViewController) -> String?
+    func sessionCompletionMessageForTaskVC(_ sessionCompletionMessageForTaskVC: ACTaskViewController) -> String?
     
-    func sessionInstructionsForTaskVC(_ sessionInstructionsForTaskVC: AssessmentViewController) -> String?
+    func sessionInstructionsForTaskVC(_ sessionInstructionsForTaskVC: ACTaskViewController) -> String?
 }
