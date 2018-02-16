@@ -15,7 +15,7 @@ import AssessmentCenter
 
 
 // initialise Assessment Center Client
-let baseURLString = "https://www.assessmentcenter.net/ac_api/.."
+let baseURLString = "<# https://www.assessmentcenter.net/ac_api/.. #>"
 let accessId = "<# AccessIdentifier #>" 
 let accessToken = "<# AccessToken #>"
 
