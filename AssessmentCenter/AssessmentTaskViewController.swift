@@ -147,9 +147,9 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
             semaphore.wait()
         }
         else if step.identifier == ACStep.introductionStep.rawValue {
-            
+           
+            step.title = self.tsk.form.title
             if let instructionsDelegate = instructionsDelegate {
-                step.title = self.tsk.form.title
                 step.text = instructionsDelegate.sessionInstructionsForTaskVC(self)
             }
             
