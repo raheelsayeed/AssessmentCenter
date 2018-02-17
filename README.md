@@ -1,6 +1,6 @@
 # AssessmentCenter
 
-Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer Adaptive Test (backed by Item Response Theory) provided by [AssessmentCenter](http://www.assessmentcenter.net) at Northwesturn University.
+Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer Adaptive Test (backed by Item Response Theory) provided by [AssessmentCenter](http://www.assessmentcenter.net) at Northwestern University.
 
 
 ## ResearchKit
