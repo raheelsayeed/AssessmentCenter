@@ -21,9 +21,7 @@ public class ACTaskViewController : ORKTaskViewController {
     private var movingNextPage               = true
     private var score                        : ACScore?
     private var tsk : ACTask {
-        get {
-            return self.task as! ACTask
-        }
+        get { return self.task as! ACTask }
     }
     
     required public init(acform: ACForm, client: ACClient, sessionIdentifier: String) {
@@ -95,6 +93,15 @@ public class ACTaskViewController : ORKTaskViewController {
         super.stepViewControllerWillAppear(stepViewController)
     }
     
+    public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        if let navController = self.navigationController, navController.viewControllers.count > 1 {
+            if navController.topViewController == self {
+                navController.popViewController(animated: flag)
+            }
+        }
+        super.dismiss(animated: flag, completion: completion)
+    }
+    
     
 }
 
@@ -112,22 +119,13 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
     
     public func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
         
-        if let taskDelegate = taskDelegate {
-            
-            if reason == .completed {
-                taskDelegate.assessmentViewController(self, didFinishWith: .success, error: nil, tscore: Double(score!.tscore), stderror: Double(score!.standardError), session: self.tsk.session!)
-            }
-            
-            if taskDelegate.canDismissTaskVC(self) {
-                self.dismiss(animated: true, completion: nil)
-            }
+        self.taskDelegate?.assessmentViewController(self, didFinishWith: .success, error: nil, tscore: Double(score!.tscore), stderror: Double(score!.standardError), session: self.tsk.session!)
+        self.dismiss(animated: true) {
+            self.taskDelegate?.didDismissACTaskViewController()
         }
-        else {
-            
-            self.dismiss(animated: true, completion: nil)
-        }
-        
     }
+    
+    
     
     public func taskViewController(_ taskViewController: ORKTaskViewController, viewControllerFor step: ORKStep) -> ORKStepViewController? {
         
@@ -168,7 +166,7 @@ public protocol ACTaskViewControllerDelegate : class  {
     
     func assessmentViewController(_ taskViewController: ACTaskViewController, didFinishWith reason: ACTaskFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
     
-    func canDismissTaskVC(_ canDismissVC:ACTaskViewController) -> Bool
+    func didDismissACTaskViewController()
 }
 public protocol ACTaskViewControllerInstructionsDelegate : class  {
     

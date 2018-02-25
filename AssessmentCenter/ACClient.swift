@@ -140,7 +140,38 @@ open class ACClient {
     public func form(OID: String, completion: ((_ form: ACForm?)->Void)?) {
         let acform = ACForm(_oid: OID, _title: nil, _loinc: nil)
         self.form(acform: acform, completion: completion)
+    }
+    
+    public func forms(acforms: [ACForm], completion: ((_ completeForms: [ACForm]?) -> Void)) {
+        var completedForms = [ACForm]()
+        let semaphore = DispatchSemaphore(value: 0)
+        for acForm in acforms {
+            self.form(acform: acForm, completion: { (completedForm) in
+                if let completedForm = completedForm {
+                    completedForms.append(completedForm)
+                }
+                semaphore.signal()
+            })
+            semaphore.wait()
+        }
+        completion(completedForms)
+    }
+    
+    
+    public func forms(formIdentifiers: [String], completion: ((_ completeForms: [ACForm]?) -> Void)){
         
+        var completedForms = [ACForm]()
+        let semaphore = DispatchSemaphore(value: 0)
+        for formOID in formIdentifiers {
+            self.form(OID: formOID, completion: { (completedForm) in
+                if let completedForm = completedForm {
+                    completedForms.append(completedForm)
+                }
+                semaphore.signal()
+            })
+            semaphore.wait()
+        }
+        completion(completedForms)
     }
     
     
