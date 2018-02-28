@@ -15,6 +15,7 @@ open class ACAbstractItem {
     public  let OID : String
     public  let responseOID: String?
     public  let order: UInt?
+    public  var loinc : String?
     
     public init(oid: String, responseOID: String?, order: UInt?) {
         self.OID = oid
@@ -59,6 +60,7 @@ public class QuestionItem : ACAbstractItem {
             let question = json["Description"] as? String,
             let order = json["ElementOrder"] as? String {
             let qItem = QuestionItem(oid: oid, question: question, responseOID: nil, order: UInt(order)!)
+          
             return qItem
         }
         return nil
@@ -85,6 +87,9 @@ public class ResponseItem : ACAbstractItem {
            let order = json["Position"] as? String {
             
             let responseItem = ResponseItem(oid: oid, order: UInt(order)!, responseText: response, responseValue: value, responseOID: responseOID)
+            if let loinc = json["LOINC_NUM"] as? String {
+                responseItem.loinc = loinc
+            }
             return responseItem
         }
         return nil
@@ -130,6 +135,9 @@ public class QuestionForm : ACAbstractItem {
             let responseItemElements = questionItemElements.last!["Map"] as! [JSONDict]
             let responseItems = responseItemElements.map{ ResponseItem.create(from: $0)! }
             let questionForm = QuestionForm(oid: formOID, questions: qItems, responses: responseItems, formID: formID, order: UInt(order)!)
+            if let loinc = json["LOINC_NUM"] as? String {
+                questionForm.loinc = loinc
+            }
             return questionForm
         }
         return nil
@@ -140,13 +148,14 @@ public class QuestionForm : ACAbstractItem {
 public class ACForm : ACAbstractItem {
     
     public final let title: String?
-    public final let loinc: String?
+//    public final let loinc: String?
     public final var questionForms : [QuestionForm]?
     
     public init(_oid : String, _title: String?, _loinc: String?) {
         self.title = _title
-        self.loinc = _loinc
         super.init(oid: _oid, responseOID: nil, order: nil)
+        self.loinc = _loinc
+
     }
     
     
@@ -179,6 +188,7 @@ public class SessionItem : ACAbstractItem {
     public final var completionDate : Date?
     public final var completionDateString     : String?
     public var lastResponse : ResponseItem?
+    public var score : ACScore?
     public var hasEnded : Bool {
         get {
             let date = Date()
