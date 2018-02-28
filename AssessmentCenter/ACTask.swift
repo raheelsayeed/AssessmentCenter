@@ -15,13 +15,13 @@ public enum ACStep : String {
     case conclusionStep
 }
 
-class ACTask : ORKNavigableOrderedTask {
+public class ACTask : ORKNavigableOrderedTask {
     
-    var session : SessionItem?
+    public var session : SessionItem?
     let client  : ACClient
-    let form    : ACForm
+    public let form    : ACForm
     
-    required init(acform: ACForm, client: ACClient) {
+    required public init(acform: ACForm, client: ACClient) {
         self.form = acform
         self.client = client
         var steps = acform.researchKit_steps()
@@ -35,19 +35,19 @@ class ACTask : ORKNavigableOrderedTask {
         return instructionStep
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required public init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func step(after step: ORKStep?, with result: ORKTaskResult) -> ORKStep? {
+    override public func step(after step: ORKStep?, with result: ORKTaskResult) -> ORKStep? {
         
         guard let sourceStep = step else {
             return super.step(after:step, with: result)
         }
         
-        if let chosenResult = result.stepResult(forStepIdentifier: sourceStep.identifier),
+        if  let chosenResult = result.stepResult(forStepIdentifier: sourceStep.identifier),
             let answerResult = chosenResult.firstResult as? ORKChoiceQuestionResult,
-        let resultIdentifier = answerResult.choiceAnswers?.first as? String{
+            let resultIdentifier = answerResult.choiceAnswers?.first as? String {
             
             let responseOID = resultIdentifier.components(separatedBy: "+").first //as! String
             let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
