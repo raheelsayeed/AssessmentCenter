@@ -101,19 +101,15 @@ public class QuestionForm : ACAbstractItem {
     public final var question  : String?
     public final var questions : [QuestionItem]
     public final var responses : [ResponseItem]
+    public final var responseForm : ACResponseForm?
     public final let formID    : String
     public final var responseDate : Date?
-    public final var answeredResponseOID : String?
-    public final var selectedResponse: ResponseItem? {
-        get {
-            if answeredResponseOID == nil { return nil }
-            return responses.filter{ $0.OID == answeredResponseOID }.first
-        }
-        set {
-            answeredResponseOID = newValue?.OID
-            responseDate = Date()
+    public final var answeredResponseOID : String? {
+        didSet {
+            answeredResponse = responses.filter{ $0.responseOID == answeredResponseOID }.first
         }
     }
+    public var answeredResponse: ResponseItem?
     
     public init(oid: String, questions: [QuestionItem], responses: [ResponseItem], formID: String, order: UInt) {
         self.questions = questions
@@ -132,9 +128,13 @@ public class QuestionForm : ACAbstractItem {
         {
             //Create QuestionItem objects
             let qItems = questionItemElements.map { QuestionItem.create(from: $0)! }
-            let responseItemElements = questionItemElements.last!["Map"] as! [JSONDict]
+            let responseElement = questionItemElements.last!
+            let responseItemElements = responseElement["Map"] as! [JSONDict]
             let responseItems = responseItemElements.map{ ResponseItem.create(from: $0)! }
             let questionForm = QuestionForm(oid: formOID, questions: qItems, responses: responseItems, formID: formID, order: UInt(order)!)
+            if let responseForm    = ACResponseForm.create(from: responseElement) {
+                questionForm.responseForm  = responseForm
+            }
             if let loinc = json["LOINC_NUM"] as? String {
                 questionForm.loinc = loinc
             }
@@ -175,8 +175,18 @@ public class ACForm : ACAbstractItem {
         }
         
         let qForm = questionForms.filter{ $0.OID == qOID }.first
+        qForm?.answeredResponseOID = responseOID
         return qForm?.responses.filter{ $0.responseOID == responseOID }.first
     }
+    
+    
+    public func answeredQuestionsForms() -> [QuestionForm]? {
+        guard let questionForms = questionForms else {
+            return nil
+        }
+        return questionForms.filter { $0.answeredResponseOID != nil }
+    }
+    
 }
 
 
@@ -205,6 +215,32 @@ public class SessionItem : ACAbstractItem {
     
     func description() -> String {
         return (" OID: \(self.OID)\n, User: \(self.username ?? "Nil")\n Expiration: \(self.expirationDate), finished: \(String(describing: self.completionDate))")
+    }
+    
+    
+}
+
+
+public class ACResponseForm : ACAbstractItem {
+    
+    public let responseItems : [ResponseItem]
+    
+    public init(oid: String, responseItems: [ResponseItem]) {
+        
+        self.responseItems = responseItems
+        super.init(oid: oid, responseOID: nil, order: nil)
+    }
+    
+    class func create(from json: JSONDict) -> ACResponseForm? {
+        
+        if let responses = json["Map"] as? [JSONDict] {
+            let responseItems = responses.map{ ResponseItem.create(from: $0)! }
+            let responseForm = ACResponseForm(oid: json["ElementOID"] as! String, responseItems: responseItems)
+            responseForm.loinc = json["LOINC_NUM"] as? String
+            print(responseForm.listPropertiesWithValues())
+            return responseForm
+        }
+        return nil
     }
     
     

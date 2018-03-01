@@ -19,10 +19,18 @@ public class ACTaskViewController : ORKTaskViewController {
     public weak var instructionsDelegate    : ACTaskViewControllerInstructionsDelegate? = nil
     public weak var taskDelegate            : ACTaskViewControllerDelegate? = nil
     private var movingNextPage               = true
-    private var score                        : ACScore?
+    
+    public var session : SessionItem? {
+        get { return self.tsk.session }
+    }
+    
     private var tsk : ACTask {
         get { return self.task as! ACTask }
     }
+    public var score: ACScore? {
+        get {return self.tsk.session?.score }
+    }
+    
     
     required public init(acform: ACForm, client: ACClient, sessionIdentifier: String) {
         self.sessionIdentifier = sessionIdentifier
@@ -66,7 +74,7 @@ public class ACTaskViewController : ORKTaskViewController {
     }
     
     public override func stepViewController(_ stepViewController: ORKStepViewController, didFinishWith direction: ORKStepViewControllerNavigationDirection) {
-        movingNextPage = true
+        movingNextPage = (direction == .forward) ? true : false
         super.stepViewController(stepViewController, didFinishWith: direction)
     }
     
@@ -119,7 +127,8 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
     
     public func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
         
-        self.taskDelegate?.assessmentViewController(self, didFinishWith: .success, error: nil, tscore: Double(score!.tscore), stderror: Double(score!.standardError), session: self.tsk.session!)
+        
+        self.taskDelegate?.assessmentViewController(self, didFinishWith: .success, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
         self.dismiss(animated: true) {
             self.taskDelegate?.didDismissACTaskViewController()
         }
@@ -133,7 +142,8 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
             let semaphore = DispatchSemaphore(value: 0)
             self.tsk.client.score(session: self.tsk.session!, completion: { [unowned self] (acScore, error) in
                 if let acScore = acScore {
-                    self.score = acScore
+//                    self.score = acScore
+                    self.tsk.session?.score = acScore
                     self.configureConclusionFor(step: step, with: acScore)
                 }
                 else {
@@ -147,9 +157,7 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
         else if step.identifier == ACStep.introductionStep.rawValue {
            
             step.title = self.tsk.form.title
-            if let instructionsDelegate = instructionsDelegate {
-                step.text = instructionsDelegate.sessionInstructionsForTaskVC(self)
-            }
+            step.text  = instructionsDelegate?.instructionsFor(self)
             
         }
      
@@ -170,7 +178,7 @@ public protocol ACTaskViewControllerDelegate : class  {
 }
 public protocol ACTaskViewControllerInstructionsDelegate : class  {
     
-    func sessionCompletionMessageForTaskVC(_ sessionCompletionMessageForTaskVC: ACTaskViewController) -> String?
+    func completionMessageFor(_ taskViewController: ACTaskViewController) -> String?
     
-    func sessionInstructionsForTaskVC(_ sessionInstructionsForTaskVC: ACTaskViewController) -> String?
+    func instructionsFor(_ taskViewController: ACTaskViewController) -> String?
 }

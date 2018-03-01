@@ -12,6 +12,9 @@
 		D442E0C2203341030012857C /* ACModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442E0C1203341030012857C /* ACModel.swift */; };
 		D442E0CA2033509D0012857C /* ACClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442E0C92033509D0012857C /* ACClient.swift */; };
 		D442E0CC203351210012857C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D442E0CB203351210012857C /* Extensions.swift */; };
+		D45F2C5A2048611A00755A9E /* Questionnaire_PROMIS.json in Resources */ = {isa = PBXBuildFile; fileRef = D45F2C592048611A00755A9E /* Questionnaire_PROMIS.json */; };
+		D45F2C72204864A900755A9E /* QuestionnaireResponse_PROMIS.json in Resources */ = {isa = PBXBuildFile; fileRef = D45F2C71204864A900755A9E /* QuestionnaireResponse_PROMIS.json */; };
+		D4A19F1F20475F550099961C /* ACModel+FHIR.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A19F1E20475F540099961C /* ACModel+FHIR.swift */; };
 		D4E75D4D20348E8B000CE95A /* ACModel+ResearchKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E75D4C20348E8B000CE95A /* ACModel+ResearchKit.swift */; };
 		D4E75D4F20349CF9000CE95A /* AssessmentTaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E75D4E20349CF9000CE95A /* AssessmentTaskViewController.swift */; };
 		D4E75D512034A32B000CE95A /* ACTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E75D502034A32B000CE95A /* ACTask.swift */; };
@@ -26,6 +29,9 @@
 		D442E0C1203341030012857C /* ACModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ACModel.swift; sourceTree = "<group>"; };
 		D442E0C92033509D0012857C /* ACClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ACClient.swift; sourceTree = "<group>"; };
 		D442E0CB203351210012857C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		D45F2C592048611A00755A9E /* Questionnaire_PROMIS.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Questionnaire_PROMIS.json; sourceTree = "<group>"; };
+		D45F2C71204864A900755A9E /* QuestionnaireResponse_PROMIS.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = QuestionnaireResponse_PROMIS.json; sourceTree = "<group>"; };
+		D4A19F1E20475F540099961C /* ACModel+FHIR.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ACModel+FHIR.swift"; sourceTree = "<group>"; };
 		D4E75D4C20348E8B000CE95A /* ACModel+ResearchKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ACModel+ResearchKit.swift"; sourceTree = "<group>"; };
 		D4E75D4E20349CF9000CE95A /* AssessmentTaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentTaskViewController.swift; sourceTree = "<group>"; };
 		D4E75D502034A32B000CE95A /* ACTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ACTask.swift; sourceTree = "<group>"; };
@@ -55,6 +61,7 @@
 		D442E0A620333FD30012857C = {
 			isa = PBXGroup;
 			children = (
+				D45F2C58204860FB00755A9E /* FHIR-Samples */,
 				D4E75DE8203C7192000CE95A /* README.md */,
 				D442E0B220333FD30012857C /* AssessmentCenter */,
 				D442E0B120333FD30012857C /* Products */,
@@ -74,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				D442E0B320333FD30012857C /* AssessmentCenter.h */,
+				D4A19F1E20475F540099961C /* ACModel+FHIR.swift */,
 				D4E75D4C20348E8B000CE95A /* ACModel+ResearchKit.swift */,
 				D4E75D502034A32B000CE95A /* ACTask.swift */,
 				D4E75D4E20349CF9000CE95A /* AssessmentTaskViewController.swift */,
@@ -83,6 +91,15 @@
 				D442E0B420333FD30012857C /* Info.plist */,
 			);
 			path = AssessmentCenter;
+			sourceTree = "<group>";
+		};
+		D45F2C58204860FB00755A9E /* FHIR-Samples */ = {
+			isa = PBXGroup;
+			children = (
+				D45F2C592048611A00755A9E /* Questionnaire_PROMIS.json */,
+				D45F2C71204864A900755A9E /* QuestionnaireResponse_PROMIS.json */,
+			);
+			path = "FHIR-Samples";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -156,6 +173,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4E75DE9203C7192000CE95A /* README.md in Resources */,
+				D45F2C72204864A900755A9E /* QuestionnaireResponse_PROMIS.json in Resources */,
+				D45F2C5A2048611A00755A9E /* Questionnaire_PROMIS.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,6 +185,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4A19F1F20475F550099961C /* ACModel+FHIR.swift in Sources */,
 				D442E0CA2033509D0012857C /* ACClient.swift in Sources */,
 				D4E75D4D20348E8B000CE95A /* ACModel+ResearchKit.swift in Sources */,
 				D4E75D512034A32B000CE95A /* ACTask.swift in Sources */,

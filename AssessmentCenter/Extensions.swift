@@ -35,5 +35,4 @@ extension Date {
         formatter.dateFormat = "M/d/yyyy h:mm:ss a"
         return formatter
     }()
-    
 }
