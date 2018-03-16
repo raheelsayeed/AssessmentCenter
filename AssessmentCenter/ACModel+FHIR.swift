@@ -59,27 +59,27 @@ extension ACForm {
         guard let answeredQuestionsForms = answeredQuestionsForms()  else {
             return nil
         }
-        
-        
-        
         var qr = JSONType()
+        if var q = as_FHIRQuestionnaire() {
+            let iden = loinc ?? OID
+            q["id"] = iden
+            qr["questionnaire"] = ["reference" : "#\(iden)"]
+            qr["contained"] = [q]
+        }
         qr["resourceType"] = "QuestionnaireResponse"
         qr["status"]       = "completed"
-        // Requires Patient
         qr["item"]         = answeredQuestionsForms.map({ (qForm) -> JSONType in
             
             let answerItem = qForm.answeredResponse!
+            let coding  : JSONType
+            if let loinc = answerItem.loinc {
+                coding  = ["code" : loinc, "display" : answerItem.text, "system" : "http://loinc.org"]
+            } else {
+                coding  = ["code" : answerItem.value, "display" : answerItem.text, "system" : "http://assessmentcenter.net"]
+            }
             return [ "linkId" : qForm.formID,
                      "text"   : qForm.question!,
-                     "answer" : [
-                        [
-                        "valueCoding" : [
-                                "code" : answerItem.value,
-                                "display" : answerItem.text,
-                                "system"  : "http://assessmentcenter.net"
-                            ]
-                        ]
-                        ]
+                     "answer" : [["valueCoding" : coding]]
                 ]
         })
         return qr
@@ -144,7 +144,7 @@ extension ResponseItem {
     public func as_FHIR() -> JSONType? {
         
         let code : JSONType = [
-            "code"          : loinc ?? responseOID!,
+            "code"          : responseOID!,
             "display"       : text,
             "id"            : responseOID!
         ]

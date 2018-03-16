@@ -35,6 +35,7 @@ extension QuestionForm {
         let questionStep = ORKQuestionStep(identifier: self.OID)
         questionStep.answerFormat = ORKTextChoiceAnswerFormat(style: ORKChoiceAnswerStyle.singleChoice, textChoices: choices)
         questionStep.title = question
+        questionStep.isOptional = false 
         return questionStep
     }
 }

@@ -85,19 +85,23 @@ public class ACTaskViewController : ORKTaskViewController {
     
     public override func stepViewControllerWillAppear(_ stepViewController: ORKStepViewController) {
         
-        if stepViewController.step?.identifier == ACStep.conclusionStep.rawValue {
-            stepViewController.continueButtonTitle = btnTitle_Conluded
-            stepViewController.title = "SESSION TOKEN: \(self.tsk.session!.OID)"
-        }
-        else if stepViewController.step?.identifier == ACStep.introductionStep.rawValue {
-            stepViewController.continueButtonTitle = btnTitle_BeginSession
-            stepViewController.title = self.tsk.form.title
+        stepViewController.title = sessionIdentifier
+        if let step = stepViewController.step {
             
+            let btntitle : String
+            switch step.identifier {
+            case ACStep.conclusionStep.rawValue:
+                btntitle = btnTitle_Conluded
+                break
+            case ACStep.introductionStep.rawValue:
+                btntitle = btnTitle_BeginSession
+                break
+            default:
+                btntitle = btnTitle_inSession
+            }
+            stepViewController.continueButtonTitle = btntitle
         }
-        else {
-            stepViewController.continueButtonTitle = btnTitle_inSession
-            stepViewController.title = "SESSION TOKEN: \(self.tsk.session!.OID)"
-        }
+
         super.stepViewControllerWillAppear(stepViewController)
     }
     
@@ -127,8 +131,7 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
     
     public func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
         
-        
-        self.taskDelegate?.assessmentViewController(self, didFinishWith: .success, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
+        self.taskDelegate?.assessmentViewController(self, didFinishWith: reason, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
         self.dismiss(animated: true) {
             self.taskDelegate?.didDismissACTaskViewController()
         }
@@ -142,7 +145,6 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
             let semaphore = DispatchSemaphore(value: 0)
             self.tsk.client.score(session: self.tsk.session!, completion: { [unowned self] (acScore, error) in
                 if let acScore = acScore {
-//                    self.score = acScore
                     self.tsk.session?.score = acScore
                     self.configureConclusionFor(step: step, with: acScore)
                 }
@@ -164,15 +166,11 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
         return nil
     }
 }
-public enum ACTaskFinishReason : Int {
-    
-    case success
-    case fail
-}
+
 
 public protocol ACTaskViewControllerDelegate : class  {
     
-    func assessmentViewController(_ taskViewController: ACTaskViewController, didFinishWith reason: ACTaskFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
+    func assessmentViewController(_ taskViewController: ACTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
     
     func didDismissACTaskViewController()
 }
