@@ -148,7 +148,6 @@ public class QuestionForm : ACAbstractItem {
 public class ACForm : ACAbstractItem {
     
     public final let title: String?
-//    public final let loinc: String?
     public final var questionForms : [QuestionForm]?
     
     public init(_oid : String, _title: String?, _loinc: String?) {

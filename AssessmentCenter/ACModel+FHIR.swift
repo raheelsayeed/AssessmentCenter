@@ -28,7 +28,7 @@ extension ACForm {
         
         if let loinc = loinc {
             fhirFORM["code"] = [
-                [ "system" : "http://loin.org", "code" : loinc]
+                [ "system" : "http://loinc.org", "code" : loinc]
             ]
         } else {
             fhirFORM["code"] = [
@@ -39,8 +39,19 @@ extension ACForm {
         
         let qForms = (answeredOnly) ? self.answeredQuestionsForms()! : questionForms
         
-        
-        fhirFORM["item"] = qForms.map  { $0.as_FHIR() }
+		var questionitems = qForms.map { $0.as_FHIR() }
+		questionitems.append([
+			"linkId" : "tscore",
+			"readOnly" : true,
+			"type"     : "string"
+			])
+		questionitems.append([
+			"linkId" : "stderror",
+			"readOnly" : true,
+			"type"     : "string"
+			])
+		
+        fhirFORM["item"] = questionitems
         let responseForms = qForms.map { $0.responseForm! }
         
         // Contained Answer ValueSets
@@ -54,7 +65,7 @@ extension ACForm {
         return fhirFORM
     }
     
-    public func as_FHIRQuestionnaireResponse() -> JSONType? {
+	public func as_FHIRQuestionnaireResponse(with score: ACScore? = nil) -> JSONType? {
         
         guard let answeredQuestionsForms = answeredQuestionsForms()  else {
             return nil
@@ -62,14 +73,20 @@ extension ACForm {
         var qr = JSONType()
         if var q = as_FHIRQuestionnaire() {
             let iden = loinc ?? OID
+			if loinc == nil {
+				qr["identifier"] = ["system" : "http://assessmentcenter.net", "value" : OID]
+			}
+			else {
+				qr["identifier"] = ["system" : "http://loinc.org", "value" : loinc]
+			}
             q["id"] = iden
             qr["questionnaire"] = ["reference" : "#\(iden)"]
             qr["contained"] = [q]
         }
+		
         qr["resourceType"] = "QuestionnaireResponse"
         qr["status"]       = "completed"
-        qr["item"]         = answeredQuestionsForms.map({ (qForm) -> JSONType in
-            
+		var answeredQuestions = answeredQuestionsForms.map({ (qForm) -> JSONType in
             let answerItem = qForm.answeredResponse!
             let coding  : JSONType
             if let loinc = answerItem.loinc {
@@ -82,6 +99,28 @@ extension ACForm {
                      "answer" : [["valueCoding" : coding]]
                 ]
         })
+		
+		if let score = score {
+			
+			answeredQuestions.append(
+				[
+					"linkId" : "tscore",
+					"text"   : "T-Score",
+					"answer" : [["valueString" : score.tscore]]
+				]
+			)
+			answeredQuestions.append(
+				[
+					"linkId" : "stderror",
+					"text"   : "Standard Error",
+					"answer" : [["valueString" : score.standardError]]
+				]
+			)
+		}
+		
+		qr["item"] = answeredQuestions
+		
+		
         return qr
     }
 }
@@ -142,14 +181,11 @@ extension ACResponseForm {
 extension ResponseItem {
     
     public func as_FHIR() -> JSONType? {
-        
         let code : JSONType = [
             "code"          : responseOID!,
             "display"       : text,
             "id"            : responseOID!
         ]
-        
         return code
-        
     }
 }
