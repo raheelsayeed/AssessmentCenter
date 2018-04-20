@@ -86,6 +86,7 @@ public class ACTaskViewController : ORKTaskViewController {
     public override func stepViewControllerWillAppear(_ stepViewController: ORKStepViewController) {
         
         stepViewController.title = sessionIdentifier
+		stepViewController.navigationItem.leftBarButtonItem = nil
         if let step = stepViewController.step {
             
             let btntitle : String
