@@ -149,6 +149,9 @@ public class ACForm : ACAbstractItem {
     
     public final let title: String?
     public final var questionForms : [QuestionForm]?
+	public final var complete : Bool {
+		get { return questionForms != nil }
+	}
     
     public init(_oid : String, _title: String?, _loinc: String?) {
         self.title = _title
