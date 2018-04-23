@@ -11,6 +11,64 @@ import Foundation
 public typealias JSONType = [String : Any]
 
 extension ACForm {
+	
+	public func as_ACFHIRCoding() -> JSONType? {
+		var coding = [ "system" : "http://assessmentcenter.net", "code" : OID]
+		if let title = title { coding["display"] = title }
+		return coding
+	}
+	
+	public func as_LOINCFHIRCoding() -> JSONType? {
+		guard let loinc = loinc else  { return nil }
+		var coding = [ "system" : "http://loinc.org", "code" : loinc]
+		if let title = title { coding["display"] = title }
+		return coding
+	}
+	
+	
+	public func as_FHIRObservation(with score: ACScore? = nil, related qrResourceId: String? = nil, subject patientId : String?=nil) -> JSONType? {
+		
+		var fhirObs : JSONType = [
+			"status"		:	"final",
+			"resourceType"	:	"Observation",
+			"category"		:	[
+				[
+					"coding"	:	[
+						[
+							"system"	:	"http://hl7.org/fhir/observation-category",
+							"code"		:	"survey",
+							"display"	:	"Survey"
+						]
+						
+					]
+				]
+			],
+			"code"			:	[
+				"coding"	:	[as_LOINCFHIRCoding() ?? as_ACFHIRCoding()],
+				"text" 			:	title ?? "PROMIS Survey"
+				]
+		]
+		
+		if let score = score {
+			let now = Date()
+			let timeStr = ISO8601DateFormatter().string(from: now)
+			fhirObs["effectiveDateTime"]	=	timeStr
+			fhirObs["valueString"]			=	score.tscore
+		}
+		if let  qrResourceId = qrResourceId {
+			fhirObs["related"] = [
+					[
+						"type" 	: 	"derived-from",
+						"target":	["reference"	:	"QuestionnaireResponse/\(qrResourceId)"]
+					]
+				]
+		}
+		
+		if let patientId = patientId {
+			fhirObs["subject"] = ["reference" :	"Patient/\(patientId)"]
+		}
+		return fhirObs
+	}
     
     public func as_FHIRQuestionnaire(answeredOnly: Bool = true) -> JSONType? {
         
@@ -123,6 +181,7 @@ extension ACForm {
 		
         return qr
     }
+	
 }
 
 extension QuestionForm {
