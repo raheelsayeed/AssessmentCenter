@@ -27,6 +27,7 @@ open class ACClient {
     
     static let keyAllForms = "Forms/.json"
     static let keyForm     = "Form"
+	
     
     private final let accessIdentifier : String
     private final let accessToken : String
@@ -85,7 +86,10 @@ open class ACClient {
         let request = defaultRequest(path: path, headers: headers)
         
         let dataTask = URLSession.shared.dataTask(with: request) { (data, urlresponse, rerror) in
-            
+			
+			let httpResponse = urlresponse as! HTTPURLResponse
+			print(httpResponse.debugDescription)
+			
             if let data = data {
                 do {
                     let decodedJSON = try JSONSerialization.jsonObject(with: data, options: [])
@@ -98,6 +102,11 @@ open class ACClient {
                     completion(nil, error)
                 }
             } else {
+				
+				if let httpResponse = urlresponse as? HTTPURLResponse {
+					print(httpResponse.statusCode)
+				}
+				
                 print (rerror?.localizedDescription ?? "Error, data was nil")
                 completion(nil, rerror)
             }
@@ -128,12 +137,13 @@ open class ACClient {
     }
     
     public func form(acform: ACForm, completion : (( _ form: ACForm? )-> Void)?) {
-        let formEndpoint = "Forms/\(acform.OID).json"
+
+		let formEndpoint = "Forms/\(acform.OID).json"
         let header =  ["CODING_SYSTEM" : "LOINC"]
         performRequest(path: formEndpoint, headers: header) { (json, error) in
             if let json = json {
                 acform.parse(from: json)
-                completion?(acform)
+				completion?(acform.complete ? acform : nil)
             }
         }
     }
@@ -155,7 +165,7 @@ open class ACClient {
             })
             semaphore.wait()
         }
-        completion(completedForms)
+		completion(completedForms.count > 0 ? completedForms : nil)
     }
     
     
@@ -178,7 +188,7 @@ open class ACClient {
     
     public func beginSession(with form: ACForm, username: String?, expiration: Date?, completion : ((_ newSession : SessionItem?) -> Void)?) {
         let endpoint = "Assessments/\(form.OID).json"
-        //::: No custom expiration support yet.
+        //TODO No custom expiration support yet.
         let requestHeader = ["UID" : username] as? RequestHeaders
         performRequest(path: endpoint, headers: requestHeader) { (json, error) in
             
