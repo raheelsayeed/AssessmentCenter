@@ -23,10 +23,10 @@ let client = ACClient(baseURL: URL(string: baseURLString)!, accessIdentifier: ac
 
 
 // List All Measures from Assessment Center
-client.listForms { (forms) in 
-    for form in forms {
-        print(form.title)
-    }
+client.listForms { (list) in
+	if let list = list {
+		list.forEach{ print($0.title!) }
+	}
 }
 
 
