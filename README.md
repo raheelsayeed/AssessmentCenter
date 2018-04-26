@@ -10,6 +10,8 @@ Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer A
 
 ## Getting Started
 
+### Initialise by creating a `ACClient`
+
 ```swift
 import AssessmentCenter
 
@@ -20,18 +22,33 @@ let accessId = "<# AccessIdentifier #>"
 let accessToken = "<# AccessToken #>"
 
 let client = ACClient(baseURL: URL(string: baseURLString)!, accessIdentifier: accessId, token: accessToken)
+```
 
-
-// List All Measures from Assessment Center
+### List all available instruments provided by the Assessment Center.
+```swift
+// Fetches a list of available of `ACForm` from Assessment Center
 client.listForms { (list) in
 	if let list = list {
 		list.forEach{ print($0.title!) }
 	}
 }
+```
+
+###  Instrument Session
+
+- `ACForm` is passed to `ACTaskViewController` a subclass of `ORKTaskViewController`
+- Each response is sent to AssessmentCenter to get the next question.
+
+```swift
+
+// Initialise `ACForm` with OID.
+// Alternatively, `client.listForms()`
+let instrumentForm = ACForm(_oid: "<# AC Form OID #>", _title: "<# PROMIS Sleep #>", _loinc: "<# Loinc code #>)
+
+// Downloads complete instrument with questions and responses
+// Complete instrument `ACForm` is passed to create a `ORKTaskViewController` (ResearchKit's QA Interface)
 
 
-// Begin Measure
-let form = ACForm(_oid: "<# AC Form OID #>", _title: "<# PROMIS Sleep #>", _loinc: "<# Loinc code #>)
 client.form(acform: form, completion: { [unowned self] (completeForm) in 
     DispatchQueue.main.sync {
         if let completeForm = completeForm {
