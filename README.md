@@ -43,7 +43,7 @@ client.listForms { (list) in
 
 // Initialise `ACForm` with OID.
 // Alternatively, `client.listForms()`
-let instrumentForm = ACForm(_oid: "<# AC Form OID #>", _title: "<# PROMIS Sleep #>", _loinc: "<# Loinc code #>)
+let instrumentForm = ACForm(_oid: "<# AC Form OID #>", _title: "<# PROMIS Sleep #>", _loinc: "<# LOINC Code #>")
 
 // Downloads complete instrument with questions and responses
 // Complete instrument `ACForm` is passed to create a `ORKTaskViewController` (ResearchKit's QA Interface)
