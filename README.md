@@ -8,15 +8,27 @@ Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer A
 `AssessmentCenter` Framework module includes [`ResearchKit`](http://researchkit.org) as a submodule. AC by itself only utilizes its Survey module. Applications can potentially add other `ResearchKit` modules if required. 
 
 
+
+
 ## Getting Started
 
-### Initialise by creating a `ACClient`
+### Installation
+
+```
+$ git clone --recursive https://github.com/raheelsayeed/AssessmentCenter.git
+```
+
+1. Add `AssessmentCenter.xcodeproj` and `ResearchKit.xcodeproj` into the project directory of your app in Xcode. 
+2. Build the Frameworks in Xcode.
+3. Link and embed the `AssessmentCenter.framework` and `ResearchKit.framework` by selecting your app's target > **Build Phases** > **Link Binary with Libraries** and **Embed Frameworks**.
+
+### Initialize by creating a `ACClient`
 
 ```swift
 import AssessmentCenter
 
 
-// initialise Assessment Center Client
+// initialize Assessment Center Client
 let baseURLString = "<# https://www.assessmentcenter.net/ac_api/.. #>"
 let accessId = "<# AccessIdentifier #>" 
 let accessToken = "<# AccessToken #>"
