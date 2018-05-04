@@ -115,7 +115,7 @@ public class QuestionForm : ACAbstractItem {
         self.questions = questions
         self.responses = responses
         self.formID    = formID
-        self.question  = questions.filter { $0.question.contains("Container") == false }.map{ $0.question }.joined(separator: ",\n")
+        self.question  = questions.filter { $0.question.contains("Container") == false }.map{ $0.question }.joined(separator: "\n")
         super.init(oid: oid, responseOID: nil, order: order)
     }
     

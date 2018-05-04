@@ -39,7 +39,6 @@ extension ACForm {
 							"code"		:	"survey",
 							"display"	:	"Survey"
 						]
-						
 					]
 				]
 			],
@@ -150,7 +149,7 @@ extension ACForm {
             if let loinc = answerItem.loinc {
                 coding  = ["code" : loinc, "display" : answerItem.text, "system" : "http://loinc.org"]
             } else {
-                coding  = ["code" : answerItem.value, "display" : answerItem.text, "system" : "http://assessmentcenter.net"]
+                coding  = ["code" : answerItem.value, "display" : answerItem.text]
             }
             return [ "linkId" : qForm.formID,
                      "text"   : qForm.question!,
@@ -227,10 +226,17 @@ extension ACResponseForm {
         responseValueSet["resourceType"] = "ValueSet"
         responseValueSet["status"] = "active"
         // name?
-        let codableConcept = responseItems.map { $0.as_FHIR() }
+        var codableConcepts = [JSONType]()
+        var missingLoinc = false
+        for resItem in responseItems {
+            let (codeConcept, system)   =   resItem.as_CodableConcept()
+            if system != "http://loinc.org" { missingLoinc = true }
+            codableConcepts.append(codeConcept)
+        }
+        let system = (missingLoinc) ? "http://www.assessmentcenter.net" : "http://loinc.org"
         let include = [
-            ["concept" : codableConcept,
-             "system"  : "http://assesssmentcenter.net"]
+            ["concept" : codableConcepts,
+             "system"  : system]
             ]
         responseValueSet["compose"] = ["include" : include]
         return responseValueSet
@@ -239,12 +245,33 @@ extension ACResponseForm {
 }
 extension ResponseItem {
     
-    public func as_FHIR() -> JSONType? {
+    public func as_CodableConcept() -> (JSONType, String)  {
+        
+        if let loincCodableConcept = as_LOINCFHIR() {
+            return (loincCodableConcept, "http://loinc.org")
+        }
+        else {
+            return (as_FHIR(), "http://assessmentcenter.net")
+        }
+    }
+    
+    public func as_FHIR() -> JSONType {
         let code : JSONType = [
             "code"          : responseOID!,
             "display"       : text,
             "id"            : responseOID!
         ]
         return code
+    }
+    
+    public func as_LOINCFHIR() -> JSONType? {
+        if let loinc = loinc {
+            return [
+                "code"      :   loinc,
+                "display"   :   text,
+                "id"        :   loinc
+            ]
+        }
+        return nil
     }
 }
