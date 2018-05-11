@@ -107,12 +107,13 @@ public class ACTaskViewController : ORKTaskViewController {
     }
     
     public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-        if let navController = self.navigationController, navController.viewControllers.count > 1 {
-            if navController.topViewController == self {
-                navController.popViewController(animated: flag)
-            }
-        }
-        super.dismiss(animated: flag, completion: completion)
+		
+		if let navController = self.navigationController, navController.viewControllers.count > 1 {
+				navController.popViewController(animated: flag)
+		}
+		else {
+			super.dismiss(animated: flag, completion: completion)
+		}
     }
     
     
@@ -131,11 +132,10 @@ extension ACTaskViewController : ORKTaskViewControllerDelegate {
     }
     
     public func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
-        
-        self.taskDelegate?.assessmentViewController(self, didFinishWith: reason, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
-        self.dismiss(animated: true) {
-            self.taskDelegate?.didDismissACTaskViewController()
-        }
+        taskDelegate?.assessmentViewController(self, didFinishWith: reason, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
+        	dismiss(animated: true) { [weak self] in
+            	self?.taskDelegate?.didDismissACTaskViewController()
+        	}
     }
     
     
