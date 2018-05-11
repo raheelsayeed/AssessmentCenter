@@ -108,8 +108,17 @@ public class ACTaskViewController : ORKTaskViewController {
     
     public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
 		
-		if let navController = self.navigationController, navController.viewControllers.count > 1 {
-				navController.popViewController(animated: flag)
+        // TODO: This View Controller should not know about its containing controller.
+        // Ideally references to NavigationController shouldn't be necessary
+        
+		if let navController = self.navigationController {
+            
+            if navController.viewControllers.count > 1 {
+                navController.popViewController(animated: flag)
+            }
+            else {
+                navController.dismiss(animated: flag, completion: completion)
+            }
 		}
 		else {
 			super.dismiss(animated: flag, completion: completion)
