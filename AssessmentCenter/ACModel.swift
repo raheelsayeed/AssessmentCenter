@@ -145,6 +145,19 @@ public class QuestionForm : ACAbstractItem {
     
 }
 
+public class ACBattery : ACAbstractItem {
+    
+    
+    public final var title : String? = nil
+    public final var forms : [ACForm]?
+    
+    public init(_ oid: String, _ title: String) {
+        self.title = title
+        super.init(oid: oid, responseOID: nil, order: nil)
+    }
+    
+}
+
 public class ACForm : ACAbstractItem {
     
     public final let title: String?

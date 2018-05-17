@@ -120,12 +120,44 @@ open class ACClient {
         let header = (loinc) ? ["CODING_SYSTEM" : "LOINC"] : nil
 
         performRequest(path: ACClient.keyAllForms, headers: header) { (responseJSON, error) in
-            
             if let responseJSON = responseJSON, let list = responseJSON["Form"] as? [[String:String]] {
                 print(list)
                 let acForms : [ACForm] = list.map {
                     ACForm(_oid: $0["OID"]!, _title: $0["Name"]!, _loinc: $0["LOINC_NUM"])
                 }
+                completion?(acForms)
+            }
+            
+            if let error = error {
+                print(error.localizedDescription)
+            }
+            completion?(nil)
+        }
+    }
+    
+    public func listBatteries(completion: ((_ batteries: [ACBattery]?) -> Void)?) {
+        performRequest(path: "Batteries/.json", headers: nil) { (json, error) in
+            if let json = json, let list = json["Battery"] as? [[String:String]] {
+                print(list)
+                let acBatteries : [ACBattery] = list.map { ACBattery($0["OID"]!, $0["Name"]!) }
+                completion?(acBatteries)
+            }
+            if let error = error {
+                print(error.localizedDescription)
+            }
+            completion?(nil)
+        }
+    }
+    
+    public func forms(from battery: ACBattery, completion: ((_ forms: [ACForm]?) -> Void)?) {
+        
+        let batteryEndpoint = "Batteries/\(battery.OID).json"
+        performRequest(path: batteryEndpoint, headers: nil) { (json, error) in
+            if let json = json, let list = json["Forms"] as? [[String:String]] {
+                let acForms = list.map({ (form) -> ACForm in
+                    let acform = ACForm(_oid: form["FormOID"]!, _title: form["Name"], _loinc: nil)
+                    return acform
+                })
                 completion?(acForms)
             }
             
