@@ -161,6 +161,7 @@ public class ACBattery : ACAbstractItem {
 public class ACForm : ACAbstractItem {
     
     public final let title: String?
+    public final var score: ACScore? = nil
     public final var questionForms : [QuestionForm]?
 	public final var complete : Bool {
 		get { return questionForms != nil }
