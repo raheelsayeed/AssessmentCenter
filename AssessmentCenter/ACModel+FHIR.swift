@@ -54,6 +54,8 @@ extension ACForm {
 			fhirObs["effectiveDateTime"]	=	timeStr
 			fhirObs["valueString"]			=	score.tscore
 		}
+        
+        
 		if let  qrResourceId = qrResourceId {
 			fhirObs["related"] = [
 					[
@@ -68,6 +70,7 @@ extension ACForm {
 		}
 		return fhirObs
 	}
+    
     
     public func as_FHIRQuestionnaire(answeredOnly: Bool = true) -> JSONType? {
         
@@ -136,8 +139,9 @@ extension ACForm {
 			else {
 				qr["identifier"] = ["system" : "http://loinc.org", "value" : loinc]
 			}
-            q["id"] = iden
-            qr["questionnaire"] = ["reference" : "#\(iden)"]
+            let containedId = "contained-\(iden)"
+            q["id"] = containedId
+            qr["questionnaire"] = ["reference" : "#\(containedId)"]
             qr["contained"] = [q]
         }
 		
@@ -214,8 +218,10 @@ extension ACResponseForm {
     
     public var fhir_Reference : String {
         get {
-            if let loinc = loinc { return loinc }
-            else { return OID }
+            let identifier = loinc ?? OID
+            return "contained-\(identifier)"
+//            if let loinc = loinc { return loinc }
+//            else { return OID }
         }
     }
     
