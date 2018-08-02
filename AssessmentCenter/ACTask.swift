@@ -25,12 +25,19 @@ public class ACTask : ORKNavigableOrderedTask {
         self.form = acform
         self.client = client
         var steps = acform.researchKit_steps()
-        steps?.insert(ACTask.instructionStep(identifier: ACStep.introductionStep.rawValue), at: 0)
-        steps?.append(ACTask.instructionStep(identifier: ACStep.conclusionStep.rawValue))
+        steps?.insert(ACTask.introductionStep(title: form.title, detail: nil), at: 0)
+        steps?.append(ACTask.InstructionStep(identifier: ACStep.conclusionStep.rawValue))
         super.init(identifier: acform.OID, steps: steps)
     }
     
-    class func instructionStep(identifier: String) -> ORKInstructionStep {
+    class func introductionStep(title: String?, detail: String?) -> ORKInstructionStep {
+        let i = ACTask.InstructionStep(identifier: ACStep.introductionStep.rawValue)
+        i.title = title
+        i.detailText = detail
+        return i
+    }
+    
+    class func InstructionStep(identifier: String) -> ORKInstructionStep {
         let instructionStep = ORKInstructionStep(identifier: identifier)
         return instructionStep
     }
@@ -55,13 +62,42 @@ public class ACTask : ORKNavigableOrderedTask {
                 let semaphore = DispatchSemaphore(value: 0)
                 self.client.nextQuestion(session: self.session!, responseItem: responseItem, completion: { [unowned self] (newQuestionForm, error, completed, completionDate) in
                     let destinationStepID = (completed) ? ACStep.conclusionStep.rawValue : newQuestionForm!.OID
-                    let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: destinationStepID)
-                    self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
-                    semaphore.signal()
+                    if completed {
+                        self.client.score(session: self.session!, completion: { [unowned self] (acScore, error) in
+                            if let acScore = acScore {
+                                self.session?.score = acScore
+                                self.form.score = acScore 
+                                self.configureConclusionFor(step: self.step(withIdentifier: ACStep.conclusionStep.rawValue)!, with: acScore)
+                            }
+                            else {
+                                print(error as Any)
+                                print("Cannot get score")
+                            }
+                            let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: destinationStepID)
+                            self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
+                            semaphore.signal()
+                        })
+                    }
+                    else {
+                        let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: destinationStepID)
+                        self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
+                        semaphore.signal()
+                    }
+             
                 })
                 semaphore.wait()
             }
         }
         return super.step(after: step, with: result)
+    }
+    
+    
+    func configureConclusionFor(step: ORKStep, with score: ACScore) {
+        step.title = "Completed"
+        step.text  =
+        """
+        T-Score: \(score.tscore)
+        StdError: \(score.standardError)
+        """
     }
 }
