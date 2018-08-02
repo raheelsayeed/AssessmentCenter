@@ -16,8 +16,6 @@ public class ACTaskViewController : ORKTaskViewController {
     let btnTitle_Conluded             =   "Done"
     let btnTitle_BeginSession         =   "Begin"
     let sessionIdentifier: String
-    public weak var instructionsDelegate    : ACTaskViewControllerInstructionsDelegate? = nil
-    public weak var taskDelegate            : ACTaskViewControllerDelegate? = nil
     private var movingNextPage               = true
     
     public var session : SessionItem? {
@@ -35,8 +33,7 @@ public class ACTaskViewController : ORKTaskViewController {
     required public init(acform: ACForm, client: ACClient, sessionIdentifier: String) {
         self.sessionIdentifier = sessionIdentifier
         let task = ACTask(acform: acform, client: client)
-        super.init(task: task, taskRun: nil)
-        self.delegate = self
+        super.init(task: task, taskRun: UUID(uuidString: sessionIdentifier))
     }
     
     
@@ -84,8 +81,7 @@ public class ACTaskViewController : ORKTaskViewController {
     
     
     public override func stepViewControllerWillAppear(_ stepViewController: ORKStepViewController) {
-        
-        stepViewController.title = sessionIdentifier
+
 		stepViewController.navigationItem.leftBarButtonItem = nil
         if let step = stepViewController.step {
             
@@ -105,88 +101,4 @@ public class ACTaskViewController : ORKTaskViewController {
 
         super.stepViewControllerWillAppear(stepViewController)
     }
-    
-    public override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
-		
-        // TODO: This View Controller should not know about its containing controller.
-        // Ideally references to NavigationController shouldn't be necessary
-        
-		if let navController = self.navigationController {
-            
-            if navController.viewControllers.count > 1 {
-                navController.popViewController(animated: flag)
-            }
-            else {
-                navController.dismiss(animated: flag, completion: completion)
-            }
-		}
-		else {
-			super.dismiss(animated: flag, completion: completion)
-		}
-    }
-    
-    
-}
-
-extension ACTaskViewController : ORKTaskViewControllerDelegate {
-    
-    
-    func configureConclusionFor(step: ORKStep, with score: ACScore) {
-        step.title = "Completed"
-        step.text  =
-        """
-        T-Score: \(score.tscore)
-        StdError: \(score.standardError)
-        """
-    }
-    
-    public func taskViewController(_ taskViewController: ORKTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error: Error?) {
-        taskDelegate?.assessmentViewController(self, didFinishWith: reason, error: nil, tscore: 0.0, stderror: 0.0, session: self.tsk.session!)
-        	dismiss(animated: true) { [weak self] in
-            	self?.taskDelegate?.didDismissACTaskViewController()
-        	}
-    }
-    
-    
-    
-    public func taskViewController(_ taskViewController: ORKTaskViewController, viewControllerFor step: ORKStep) -> ORKStepViewController? {
-        
-        if step.identifier == ACStep.conclusionStep.rawValue {
-            let semaphore = DispatchSemaphore(value: 0)
-            self.tsk.client.score(session: self.tsk.session!, completion: { [unowned self] (acScore, error) in
-                if let acScore = acScore {
-                    self.tsk.session?.score = acScore
-                    self.configureConclusionFor(step: step, with: acScore)
-                }
-                else {
-                    print(error as Any)
-                    print("Cannot get score")
-                }
-                semaphore.signal()
-            })
-            semaphore.wait()
-        }
-        else if step.identifier == ACStep.introductionStep.rawValue {
-           
-            step.title = self.tsk.form.title
-            step.text  = instructionsDelegate?.instructionsFor(self)
-            
-        }
-     
-        return nil
-    }
-}
-
-
-public protocol ACTaskViewControllerDelegate : class  {
-    
-    func assessmentViewController(_ taskViewController: ACTaskViewController, didFinishWith reason: ORKTaskViewControllerFinishReason, error : Error?, tscore: Double?, stderror: Double?, session: SessionItem)
-    
-    func didDismissACTaskViewController()
-}
-public protocol ACTaskViewControllerInstructionsDelegate : class  {
-    
-    func completionMessageFor(_ taskViewController: ACTaskViewController) -> String?
-    
-    func instructionsFor(_ taskViewController: ACTaskViewController) -> String?
 }
