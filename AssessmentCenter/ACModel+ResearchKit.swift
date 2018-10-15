@@ -30,9 +30,9 @@ extension QuestionForm {
             return nil
         }
         let choices : [ORKTextChoice] = responses.map {
-            ORKTextChoice(text: $0.text, detailText: nil, value:"\($0.responseOID!)+\($0.value)" as NSCoding & NSCopying & NSObjectProtocol, exclusive: false)
+            ORKTextChoice(text: $0.text, detailText: nil, value:"\($0.responseOID!)+\($0.value)+\($0.text)" as NSCoding & NSCopying & NSObjectProtocol, exclusive: false)
         }
-        let questionStep = ORKQuestionStep(identifier: self.OID)
+        let questionStep = ORKQuestionStep(identifier: formID)
         questionStep.answerFormat = ORKTextChoiceAnswerFormat(style: ORKChoiceAnswerStyle.singleChoice, textChoices: choices)
         questionStep.title = question
         questionStep.isOptional = false 

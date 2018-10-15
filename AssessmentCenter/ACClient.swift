@@ -18,8 +18,7 @@
 import Foundation
 
 public typealias JSONDict = [String: Any]
-typealias RequestHeaders = [String : String]
-
+typealias RequestBody = [String : String]
 
 
 open class ACClient {
@@ -56,24 +55,24 @@ open class ACClient {
             return "\(accessIdentifier):\(accessToken)".base64encoded()
         }
     }
-    private func defaultRequest(path:String, headers: RequestHeaders?)-> URLRequest {
+    private func defaultRequest(path:String, requestBody: RequestBody?)-> URLRequest {
         
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("Basic \(authEncoded)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        if let headers = headers {
-            var headerString = headers.reduce(into: String(), { (resultstring, arg) in
+        if let requestBody = requestBody {
+            var requestString = requestBody.reduce(into: String(), { (resultstring, arg) in
                 let (key, value) = arg
                 resultstring += "\(key)=\(value.URLEncoded())&"
             })
-            headerString.removeLast(1)
-            request.httpBody = headerString.data(using: .utf8)
+            requestString.removeLast(1)
+            request.httpBody = requestString.data(using: .utf8)
         }
         return request
 
     }
-    private func performRequest(path : String, headers: RequestHeaders?, completion: @escaping (_ response: JSONDict?, _ error: Error?) -> Void) {
+    private func performRequest(path : String, requestBody: RequestBody?, completion: @escaping (_ response: JSONDict?, _ error: Error?) -> Void) {
         
         if path.isEmpty {
             print("No API Endpoint")
@@ -83,7 +82,7 @@ open class ACClient {
         print("Requesting.. \(path)")
         
         // ::: Should all operations in Queue be cancelled?
-        let request = defaultRequest(path: path, headers: headers)
+        let request = defaultRequest(path: path, requestBody: requestBody)
         
         let dataTask = URLSession.shared.dataTask(with: request) { (data, urlresponse, rerror) in
 			
@@ -117,9 +116,9 @@ open class ACClient {
     
     
     public func listForms(loinc: Bool = true, completion : ((_ forms: [ACForm]?)->Void)?) {
-        let header = (loinc) ? ["CODING_SYSTEM" : "LOINC"] : nil
+        let requestBody = (loinc) ? ["CODING_SYSTEM" : "LOINC"] : nil
 
-        performRequest(path: ACClient.keyAllForms, headers: header) { (responseJSON, error) in
+        performRequest(path: ACClient.keyAllForms, requestBody: requestBody) { (responseJSON, error) in
             if let responseJSON = responseJSON, let list = responseJSON["Form"] as? [[String:String]] {
                 print(list)
                 let acForms : [ACForm] = list.map {
@@ -136,7 +135,7 @@ open class ACClient {
     }
     
     public func listBatteries(completion: ((_ batteries: [ACBattery]?) -> Void)?) {
-        performRequest(path: "Batteries/.json", headers: nil) { (json, error) in
+        performRequest(path: "Batteries/.json", requestBody: nil) { (json, error) in
             if let json = json, let list = json["Battery"] as? [[String:String]] {
                 print(list)
                 let acBatteries : [ACBattery] = list.map { ACBattery($0["OID"]!, $0["Name"]!) }
@@ -152,7 +151,7 @@ open class ACClient {
     public func forms(from battery: ACBattery, completion: ((_ forms: [ACForm]?) -> Void)?) {
         
         let batteryEndpoint = "Batteries/\(battery.OID).json"
-        performRequest(path: batteryEndpoint, headers: nil) { (json, error) in
+        performRequest(path: batteryEndpoint, requestBody: nil) { (json, error) in
             if let json = json, let list = json["Forms"] as? [[String:String]] {
                 let acForms = list.map({ (form) -> ACForm in
                     let acform = ACForm(_oid: form["FormOID"]!, _title: form["Name"], _loinc: nil)
@@ -171,8 +170,8 @@ open class ACClient {
     public func form(acform: ACForm, completion : (( _ form: ACForm? )-> Void)?) {
 
 		let formEndpoint = "Forms/\(acform.OID).json"
-        let header =  ["CODING_SYSTEM" : "LOINC"]
-        performRequest(path: formEndpoint, headers: header) { (json, error) in
+        let requestBody =  ["CODING_SYSTEM" : "LOINC"]
+        performRequest(path: formEndpoint, requestBody: requestBody) { (json, error) in
             if let json = json {
                 acform.parse(from: json)
 				completion?(acform.complete ? acform : nil)
@@ -217,12 +216,33 @@ open class ACClient {
         completion(completedForms)
     }
     
+    // MARK: Stateless API
+    
+    public func nextQ(form: ACForm, responses: [String: String]?, callback: ((_ newQuestion: QuestionForm?, _ error: Error?, _ concluded: Bool, _ score: ACScore?) -> Void)?) {
+        let endpoint = "StatelessParticipants/\(form.OID).json"
+        performRequest(path: endpoint, requestBody: responses) { (json, perror) in
+            if let json = json, let items = json["Items"] as? [JSONDict] {
+                if items.count == 1 {
+                    let qForm = QuestionForm.create(from: items.first!)
+                    callback?(qForm, nil, false, nil)
+                }
+                else {
+                    let score = ACScore(from: json)
+                    callback?(nil, nil, true, score)
+                }
+            } else {
+                    callback?(nil, perror, false, nil)
+            }
+        }
+    }
+    
+    // MARK: Sessions API
     
     public func beginSession(with form: ACForm, username: String?, expiration: Date?, completion : ((_ newSession : SessionItem?) -> Void)?) {
         let endpoint = "Assessments/\(form.OID).json"
         //TODO No custom expiration support yet.
-        let requestHeader = ["UID" : username] as? RequestHeaders
-        performRequest(path: endpoint, headers: requestHeader) { (json, error) in
+        let requestBody = ["UID" : username] as? RequestBody
+        performRequest(path: endpoint, requestBody: requestBody) { (json, error) in
             
             if let json = json, let oid = json["OID"] as? String {
                 
@@ -236,9 +256,9 @@ open class ACClient {
     
     public func nextQuestion(sessionOID: String, responseItemOID: String?, responseValue: String?, completion : ((_ newQuestionForm : QuestionForm?, _ error: Error?, _ concluded: Bool, _ completionDate: Date?)->Void)?) {
         let endpoint = "Participants/\(sessionOID).json"
-        let requestHeader = ["ItemResponseOID": responseItemOID,
-                             "Response" : responseValue] as? RequestHeaders
-        self.performRequest(path: endpoint, headers: requestHeader) { (json, rerror) in
+        let requestBody = ["ItemResponseOID": responseItemOID,
+                             "Response" : responseValue] as? RequestBody
+        self.performRequest(path: endpoint, requestBody: requestBody) { (json, rerror) in
             
             if let json = json, let formJSON = json["Items"] as? [JSONDict] {
                 if let dateFinished = json["DateFinished"] as? String, !dateFinished.isEmpty {
@@ -261,7 +281,7 @@ open class ACClient {
     
     public func score(session: SessionItem, completion: ((_ score : ACScore?, _ error : Error?)->Void)?) {
         let endpoint = "Results/\(session.OID).json"
-        performRequest(path: endpoint, headers: nil) { (json, error) in
+        performRequest(path: endpoint, requestBody: nil) { (json, error) in
             if let json = json {
                 let score = ACScore(from: json)
                 completion?(score, nil)

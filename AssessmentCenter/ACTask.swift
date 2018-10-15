@@ -46,22 +46,66 @@ public class ACTask : ORKNavigableOrderedTask {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func resultsBody(for result: ORKTaskResult) -> [String : String]? {
+        if let results = result.results?.filter({$0.identifier != ACStep.introductionStep.rawValue && $0.identifier != ACStep.conclusionStep.rawValue }).map({ $0 as! ORKStepResult }), results.count > 0 {
+            let arr = results.map({ (stepResult) -> [String: String] in
+                let stepIdentifier = stepResult.identifier
+                let choiceResult = stepResult.results?.first as! ORKChoiceQuestionResult
+                let answer = choiceResult.choiceAnswers!.first as! String
+                return [stepIdentifier : answer.components(separatedBy: "+").last!]
+            })
+            var res = [String:String]()
+            for r in arr {
+                res.updateValue(r.values.first!, forKey: r.keys.first!)
+            }
+            print(res)
+            return res
+        }
+        return nil
+    }
+    
     override public func step(after step: ORKStep?, with result: ORKTaskResult) -> ORKStep? {
         
-        guard let sourceStep = step else {
+        guard let sourceStep = step, sourceStep.identifier != ACStep.conclusionStep.rawValue else {
             return super.step(after:step, with: result)
         }
-        
+        let results = resultsBody(for: result)
+        let semaphore = DispatchSemaphore(value: 0)
+        client.nextQ(form: form, responses: results) { (questionForm, error, finished, score) in
+            if let q = questionForm {
+                let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: q.formID)
+                self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
+            }
+            else if let score = score {
+                let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: ACStep.conclusionStep.rawValue)
+                self.form.score = score
+                self.configureConclusionFor(step: self.step(withIdentifier: ACStep.conclusionStep.rawValue)!, with: score)
+                self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
+            }
+            semaphore.signal()
+        }
+        semaphore.wait()
+
+        /*
         if  let chosenResult = result.stepResult(forStepIdentifier: sourceStep.identifier),
             let answerResult = chosenResult.firstResult as? ORKChoiceQuestionResult,
             let resultIdentifier = answerResult.choiceAnswers?.first as? String {
             
             let responseOID = resultIdentifier.components(separatedBy: "+").first //as! String
-            let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
+            let responseItem = form.getResponseItem(responseOID: responseOID!, forQuestionID: sourceStep.identifier)
+//            let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
             if responseItem != nil {
                 let semaphore = DispatchSemaphore(value: 0)
+                self.client.nextQ(form: form, responses: ["PAINBE8" : "Never"], callback: { (questionForm, error, finished, score) in
+                    if let q = questionForm {
+                        let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: q.formID)
+                        self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
+                    }
+                    semaphore.signal()
+                })
+                /*
                 self.client.nextQuestion(session: self.session!, responseItem: responseItem, completion: { [unowned self] (newQuestionForm, error, completed, completionDate) in
-                    let destinationStepID = (completed) ? ACStep.conclusionStep.rawValue : newQuestionForm!.OID
+                    let destinationStepID = (completed) ? ACStep.conclusionStep.rawValue : newQuestionForm!.formID
                     if completed {
                         self.client.score(session: self.session!, completion: { [unowned self] (acScore, error) in
                             if let acScore = acScore {
@@ -84,10 +128,9 @@ public class ACTask : ORKNavigableOrderedTask {
                         semaphore.signal()
                     }
              
-                })
+                })*/
                 semaphore.wait()
-            }
-        }
+            }*/
         return super.step(after: step, with: result)
     }
     

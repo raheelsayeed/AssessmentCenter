@@ -196,6 +196,18 @@ public class ACForm : ACAbstractItem {
     }
     
     
+    public func getResponseItem(responseOID: String, forQuestionID: String) -> ResponseItem? {
+        guard let questionForms = questionForms else {
+            print("No questions in Form")
+            return nil
+        }
+        let qForm = questionForms.filter{ $0.formID == forQuestionID }.first
+        qForm?.answeredResponseOID = responseOID
+        return qForm?.responses.filter{ $0.responseOID == responseOID }.first
+        
+    }
+    
+    
     public func answeredQuestionsForms() -> [QuestionForm]? {
         guard let questionForms = questionForms else {
             return nil
@@ -263,19 +275,21 @@ public class ACResponseForm : ACAbstractItem {
 }
 
 
+
 public struct ACScore {
     
+    public  let theta : String
     public  let tscore : String
     private let stdError : String
     public  let standardError : String
-    public  let username : String
-    let formName : String
+    public  let username : String?
+    let formName : String?
     
     init(from json :JSONDict) {
-        let theta = json["Theta"] as! String
+        theta = json["Theta"] as! String
         self.stdError = json["StdError"] as! String
-        username      = json["UID"] as! String
-        formName      = json["Name"] as! String
+        username      = json["UID"] as? String
+        formName      = json["Name"] as? String
         self.tscore = String(round((Double(theta)! * 10) + 50.0))
         self.standardError =  String(round(Double(stdError)! * 10))
     }

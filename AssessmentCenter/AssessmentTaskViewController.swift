@@ -16,7 +16,7 @@ public class ACTaskViewController : ORKTaskViewController {
     let btnTitle_Conluded             =   "Done"
     let btnTitle_BeginSession         =   "Begin"
     let sessionIdentifier: String
-    private var movingNextPage               = true
+    private var movingNextPage        = true
     
     public var session : SessionItem? {
         get { return self.tsk.session }
@@ -55,12 +55,20 @@ public class ACTaskViewController : ORKTaskViewController {
     }
     
     private func beginFirstQuestion() {
-        self.tsk.client.nextQuestion(session: self.tsk.session!, responseItem: nil) { [unowned self] (newQuestionForm, error, completion, completionDate) in
-            if let newQuestionForm = newQuestionForm {
-                let rule = ORKDirectStepNavigationRule.init(destinationStepIdentifier: newQuestionForm.OID)
+        
+        self.tsk.client.nextQ(form: self.tsk.form, responses: nil) { (questionForm, error, finished, score) in
+            if let newQ = questionForm {
+                let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: newQ.formID)
                 self.tsk.setNavigationRule(rule, forTriggerStepIdentifier: ACStep.introductionStep.rawValue)
             }
         }
+        /*
+        self.tsk.client.nextQuestion(session: self.tsk.session!, responseItem: nil) { [unowned self] (newQuestionForm, error, completion, completionDate) in
+            if let newQuestionForm = newQuestionForm {
+                let rule = ORKDirectStepNavigationRule.init(destinationStepIdentifier: newQuestionForm.formID)
+                self.tsk.setNavigationRule(rule, forTriggerStepIdentifier: ACStep.introductionStep.rawValue)
+            }
+        }*/
     }
     
     // MARK: Step Delegate Methods
