@@ -46,12 +46,14 @@ public class ACTaskViewController : ORKTaskViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.showsProgressInNavigationBar = false
-        self.tsk.client.beginSession(with: self.tsk.form, username: sessionIdentifier, expiration: nil) { [unowned self] (sessionItem) in
+        /*self.tsk.client.beginSession(with: self.tsk.form, username: sessionIdentifier, expiration: nil) { [unowned self] (sessionItem) in
             if let sessionItem = sessionItem {
                 self.tsk.session = sessionItem
                 self.beginFirstQuestion()
             }
-        }
+        }*/
+        
+        beginFirstQuestion()
     }
     
     private func beginFirstQuestion() {

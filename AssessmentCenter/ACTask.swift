@@ -26,7 +26,7 @@ public class ACTask : ORKNavigableOrderedTask {
         self.client = client
         var steps = acform.researchKit_steps()
         steps?.insert(ACTask.introductionStep(title: form.title, detail: nil), at: 0)
-        steps?.append(ACTask.InstructionStep(identifier: ACStep.conclusionStep.rawValue))
+        steps?.append(ORKCompletionStep(identifier: ACStep.conclusionStep.rawValue))
         super.init(identifier: acform.OID, steps: steps)
     }
     
@@ -36,6 +36,7 @@ public class ACTask : ORKNavigableOrderedTask {
         i.detailText = detail
         return i
     }
+    
     
     class func InstructionStep(identifier: String) -> ORKInstructionStep {
         let instructionStep = ORKInstructionStep(identifier: identifier)
@@ -48,17 +49,18 @@ public class ACTask : ORKNavigableOrderedTask {
     
     func resultsBody(for result: ORKTaskResult) -> [String : String]? {
         if let results = result.results?.filter({$0.identifier != ACStep.introductionStep.rawValue && $0.identifier != ACStep.conclusionStep.rawValue }).map({ $0 as! ORKStepResult }), results.count > 0 {
-            let arr = results.map({ (stepResult) -> [String: String] in
-                let stepIdentifier = stepResult.identifier
-                let choiceResult = stepResult.results?.first as! ORKChoiceQuestionResult
-                let answer = choiceResult.choiceAnswers!.first as! String
-                return [stepIdentifier : answer.components(separatedBy: "+").last!]
-            })
+            
             var res = [String:String]()
-            for r in arr {
-                res.updateValue(r.values.first!, forKey: r.keys.first!)
+            for result in results {
+                let stepIdentifier = result.identifier
+                let choiceResult = result.results?.first as! ORKChoiceQuestionResult
+                let answer = choiceResult.choiceAnswers!.first as! String
+                let text = answer.components(separatedBy: "+").last!
+                res[stepIdentifier] = text
+                if result == results.last {
+                    form.setResponseItem(responseText: text, forQuestionID: stepIdentifier)
+                }
             }
-            print(res)
             return res
         }
         return nil
@@ -86,6 +88,7 @@ public class ACTask : ORKNavigableOrderedTask {
         }
         semaphore.wait()
 
+        //LEGACY: Sessions-API
         /*
         if  let chosenResult = result.stepResult(forStepIdentifier: sourceStep.identifier),
             let answerResult = chosenResult.firstResult as? ORKChoiceQuestionResult,
@@ -93,17 +96,9 @@ public class ACTask : ORKNavigableOrderedTask {
             
             let responseOID = resultIdentifier.components(separatedBy: "+").first //as! String
             let responseItem = form.getResponseItem(responseOID: responseOID!, forQuestionID: sourceStep.identifier)
-//            let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
+            let responseItem = self.form.getResponseItem(responseOID: responseOID!, forQuestionFormOID: sourceStep.identifier)
             if responseItem != nil {
                 let semaphore = DispatchSemaphore(value: 0)
-                self.client.nextQ(form: form, responses: ["PAINBE8" : "Never"], callback: { (questionForm, error, finished, score) in
-                    if let q = questionForm {
-                        let rule = ORKDirectStepNavigationRule(destinationStepIdentifier: q.formID)
-                        self.setNavigationRule(rule, forTriggerStepIdentifier: sourceStep.identifier)
-                    }
-                    semaphore.signal()
-                })
-                /*
                 self.client.nextQuestion(session: self.session!, responseItem: responseItem, completion: { [unowned self] (newQuestionForm, error, completed, completionDate) in
                     let destinationStepID = (completed) ? ACStep.conclusionStep.rawValue : newQuestionForm!.formID
                     if completed {
@@ -128,7 +123,7 @@ public class ACTask : ORKNavigableOrderedTask {
                         semaphore.signal()
                     }
              
-                })*/
+                })
                 semaphore.wait()
             }*/
         return super.step(after: step, with: result)

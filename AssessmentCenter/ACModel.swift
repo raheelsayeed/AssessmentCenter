@@ -104,6 +104,13 @@ public class QuestionForm : ACAbstractItem {
     public final var responseForm : ACResponseForm?
     public final let formID    : String
     public final var responseDate : Date?
+    // Used by Stateless API
+    public final var responseText: String? {
+        didSet {
+            answeredResponse = responses.filter{ $0.text == responseText }.first
+        }
+    }
+    // Used by Sessions API
     public final var answeredResponseOID : String? {
         didSet {
             answeredResponse = responses.filter{ $0.responseOID == answeredResponseOID }.first
@@ -195,7 +202,16 @@ public class ACForm : ACAbstractItem {
         return qForm?.responses.filter{ $0.responseOID == responseOID }.first
     }
     
+    public func setResponseItem(responseText: String, forQuestionID: String) {
+        guard let questionForms = questionForms else {
+            print("No questions in Form")
+            return
+        }
+        let qForm = questionForms.filter{ $0.formID == forQuestionID }.first
+        qForm?.responseText = responseText
+    }
     
+    // Sessions
     public func getResponseItem(responseOID: String, forQuestionID: String) -> ResponseItem? {
         guard let questionForms = questionForms else {
             print("No questions in Form")
@@ -212,7 +228,7 @@ public class ACForm : ACAbstractItem {
         guard let questionForms = questionForms else {
             return nil
         }
-        return questionForms.filter { $0.answeredResponseOID != nil }
+        return questionForms.filter { $0.answeredResponse != nil }
     }
     
 }
