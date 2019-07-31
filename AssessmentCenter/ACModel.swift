@@ -23,20 +23,6 @@ open class ACAbstractItem {
         self.order = order
     }
     
-    public func listPropertiesWithValues(reflect: Mirror? = nil) {
-        let mirror = reflect ?? Mirror(reflecting: self)
-        if mirror.superclassMirror != nil {
-            self.listPropertiesWithValues(reflect: mirror.superclassMirror)
-        }
-        
-        for (index, attr) in mirror.children.enumerated() {
-            if let property_name = attr.label as String! {
-                print("\(mirror.description) \(index): \(property_name) = \(attr.value)")
-            }
-        }
-    }
-    
-    
 }
 extension ACAbstractItem : Equatable {
     public static func  == (lhs: ACAbstractItem, rhs: ACAbstractItem) -> Bool {
@@ -281,7 +267,6 @@ public class ACResponseForm : ACAbstractItem {
             let responseItems = responses.map{ ResponseItem.create(from: $0)! }
             let responseForm = ACResponseForm(oid: json["ElementOID"] as! String, responseItems: responseItems)
             responseForm.loinc = json["LOINC_NUM"] as? String
-            print(responseForm.listPropertiesWithValues())
             return responseForm
         }
         return nil
