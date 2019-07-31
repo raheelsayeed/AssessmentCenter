@@ -2,13 +2,15 @@
 
 Swift framework for Patient Reported Outcome Measures (PRO-Measures). Computer Adaptive Test (backed by Item Response Theory) provided by [AssessmentCenter](http://www.assessmentcenter.net) at Northwestern University.
 
-
 ## ResearchKit
 
 `AssessmentCenter` Framework module includes [`ResearchKit`](http://researchkit.org) as a submodule. AC by itself only utilizes its Survey module. Applications can potentially add other `ResearchKit` modules if required. 
 
 
+## Updates
 
+- Update to Swift 5.0
+- ResearchKit 2.0 
 
 ## Getting Started
 
@@ -23,7 +25,7 @@ $ git clone --recursive https://github.com/raheelsayeed/AssessmentCenter.git
 3. Link and embed the `AssessmentCenter.framework` and `ResearchKit.framework` by selecting your app's target > **Build Phases** > **Link Binary with Libraries** and **Embed Frameworks**.
 
 ### Initialize by creating a `ACClient`
-
+†
 ```swift
 import AssessmentCenter
 

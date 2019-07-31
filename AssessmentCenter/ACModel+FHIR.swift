@@ -141,7 +141,7 @@ extension ACForm {
 			}
             let containedId = "contained-\(iden)"
             q["id"] = containedId
-            qr["questionnaire"] = ["reference" : "#\(containedId)"]
+            qr["questionnaire"] = "#\(containedId)"
             qr["contained"] = [q]
         }
 		
@@ -204,7 +204,7 @@ extension QuestionForm {
         questionnaireItem["text"] = self.question
         questionnaireItem["type"] = "choice"
         questionnaireItem["linkId"] = self.formID
-        questionnaireItem["options"] = ["reference" : "#\(self.responseForm!.fhir_Reference)"]
+        questionnaireItem["answerValueSet"] = "#\(self.responseForm!.fhir_Reference)"
         
         return questionnaireItem
         
@@ -241,8 +241,8 @@ extension ACResponseForm {
         }
         let system = (missingLoinc) ? "http://www.assessmentcenter.net" : "http://loinc.org"
         let include = [
-            ["concept" : codableConcepts,
-             "system"  : system]
+                ["concept" : codableConcepts,
+                 "system"  : system]
             ]
         responseValueSet["compose"] = ["include" : include]
         return responseValueSet

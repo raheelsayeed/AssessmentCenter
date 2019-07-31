@@ -27,7 +27,7 @@ open class ACClient {
     static let keyAllForms = "Forms/.json"
     static let keyForm     = "Form"
 	
-    
+    public var allForms: [ACForm]?
     private final let accessIdentifier : String
     private final let accessToken : String
     public  final let baseURL : URL
@@ -78,17 +78,12 @@ open class ACClient {
             print("No API Endpoint")
             return
         }
-        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         print("Requesting.. \(path)")
         
         // ::: Should all operations in Queue be cancelled?
         let request = defaultRequest(path: path, requestBody: requestBody)
         
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, urlresponse, rerror) in
-			
-			let httpResponse = urlresponse as! HTTPURLResponse
-			print(httpResponse.debugDescription)
-			
+        let dataTask = URLSession.shared.dataTask(with: request) { (data, urlresponse, rerror) in            
             if let data = data {
                 do {
                     let decodedJSON = try JSONSerialization.jsonObject(with: data, options: [])
@@ -97,16 +92,9 @@ open class ACClient {
                     }
                 }
                 catch {
-                    print (error.localizedDescription)
                     completion(nil, error)
                 }
             } else {
-				
-				if let httpResponse = urlresponse as? HTTPURLResponse {
-					print(httpResponse.statusCode)
-				}
-				
-                print (rerror?.localizedDescription ?? "Error, data was nil")
                 completion(nil, rerror)
             }
         }
@@ -120,17 +108,20 @@ open class ACClient {
 
         performRequest(path: ACClient.keyAllForms, requestBody: requestBody) { (responseJSON, error) in
             if let responseJSON = responseJSON, let list = responseJSON["Form"] as? [[String:String]] {
-                print(list)
                 let acForms : [ACForm] = list.map {
                     ACForm(_oid: $0["OID"]!, _title: $0["Name"]!, _loinc: $0["LOINC_NUM"])
                 }
+                self.allForms = acForms
                 completion?(acForms)
             }
-            
-            if let error = error {
-                print(error.localizedDescription)
+            else {
+                if let error = error {
+                    print(error.localizedDescription)
+                }
+                completion?(nil)
             }
-            completion?(nil)
+            
+            
         }
     }
     
@@ -173,6 +164,8 @@ open class ACClient {
         let requestBody =  ["CODING_SYSTEM" : "LOINC"]
         performRequest(path: formEndpoint, requestBody: requestBody) { (json, error) in
             if let json = json {
+                
+                
                 acform.parse(from: json)
 				completion?(acform.complete ? acform : nil)
             }
